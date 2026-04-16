@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<BorderPane fx:id="backendRoot" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.app.controllers.ShopBackendController"
+            style="-fx-background-color: #0d1117;" stylesheets="@shop-theme.css">
+
+    <top>
+        <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-padding: 16; -fx-background-color: #0b0f10;">
+                 <Label text="BACKEND SHOP - PRODUITS &amp; COMMANDES"
+                   style="-fx-text-fill: white; -fx-font-size: 20; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="← Retour boutique" onAction="#goBackShop"
+                    style="-fx-background-color: #2a3139; -fx-text-fill: #fff; -fx-padding: 10 16 10 16;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TabPane fx:id="backendTabPane" tabClosingPolicy="UNAVAILABLE" style="-fx-padding: 14;">
+            <tabs>
+                <Tab text="Produits">
+                    <BorderPane style="-fx-padding: 12;">
+                        <top>
+                            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 0 0 10 0;">
+                                <Label text="Recherche" style="-fx-text-fill: #b0b9b6;"/>
+                                <TextField fx:id="productSearchField" styleClass="dark-input" promptText="Nom ou type" onKeyReleased="#onProductFilterChanged" prefWidth="280"/>
+                                <Label text="Tri" style="-fx-text-fill: #b0b9b6;"/>
+                                <ComboBox fx:id="productSortCombo" styleClass="dark-input" onAction="#onProductFilterChanged" prefWidth="180"/>
+                            </HBox>
+                        </top>
+
+                        <center>
+                            <TableView fx:id="productTable" styleClass="dark-table" prefHeight="420">
+                                <columns>
+                                    <TableColumn fx:id="colProductId" text="ID" prefWidth="60"/>
+                                    <TableColumn fx:id="colProductName" text="Nom" prefWidth="200"/>
+                                    <TableColumn fx:id="colProductType" text="Type" prefWidth="130"/>
+                                    <TableColumn fx:id="colProductPrice" text="Prix" prefWidth="110"/>
+                                    <TableColumn fx:id="colProductStock" text="Stock" prefWidth="90"/>
+                                    <TableColumn fx:id="colProductDesc" text="Description" prefWidth="320"/>
+                                </columns>
+                            </TableView>
+                        </center>
+
+                        <bottom>
+                            <VBox spacing="8" style="-fx-padding: 12 0 0 0;">
+                                <GridPane hgap="10" vgap="8">
+                                    <columnConstraints>
+                                        <ColumnConstraints minWidth="90"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                        <ColumnConstraints minWidth="90"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                    </columnConstraints>
+
+                                    <Label text="Nom" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="productNameField" styleClass="dark-input" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                    <Label text="Type" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="productTypeField" styleClass="dark-input" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                                    <Label text="Prix" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="productPriceField" styleClass="dark-input" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                    <Label text="Stock" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                                    <TextField fx:id="productStockField" styleClass="dark-input" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                                    <Label text="Description" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <TextArea fx:id="productDescField" styleClass="dark-area" prefRowCount="3" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.columnSpan="3"/>
+                                </GridPane>
+
+                                <HBox spacing="10" alignment="CENTER_RIGHT">
+                                    <Button text="Nouveau" onAction="#clearProductForm"/>
+                                    <Button text="Ajouter" onAction="#createProduct" style="-fx-background-color: #18E3A4; -fx-text-fill: #000;"/>
+                                    <Button text="Modifier" onAction="#updateProduct"/>
+                                    <Button text="Supprimer" onAction="#deleteProduct" style="-fx-background-color: #7f1d1d; -fx-text-fill: #fff;"/>
+                                </HBox>
+                            </VBox>
+                        </bottom>
+                    </BorderPane>
+                </Tab>
+
+                <Tab text="Commandes">
+                    <BorderPane style="-fx-padding: 12;">
+                        <top>
+                            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 0 0 10 0;">
+                                <Label text="Recherche" style="-fx-text-fill: #b0b9b6;"/>
+                                <TextField fx:id="orderSearchField" styleClass="dark-input" promptText="Référence, acheteur, état" onKeyReleased="#onOrderFilterChanged" prefWidth="280"/>
+                                <Label text="Tri" style="-fx-text-fill: #b0b9b6;"/>
+                                <ComboBox fx:id="orderSortCombo" styleClass="dark-input" onAction="#onOrderFilterChanged" prefWidth="180"/>
+                            </HBox>
+                        </top>
+
+                        <center>
+                            <TableView fx:id="orderTable" styleClass="dark-table" prefHeight="420">
+                                <columns>
+                                    <TableColumn fx:id="colOrderId" text="ID" prefWidth="55"/>
+                                    <TableColumn fx:id="colOrderRef" text="Référence" prefWidth="140"/>
+                                    <TableColumn fx:id="colOrderBuyer" text="Acheteur" prefWidth="150"/>
+                                    <TableColumn fx:id="colOrderProduct" text="Produit" prefWidth="170"/>
+                                    <TableColumn fx:id="colOrderQty" text="Qté" prefWidth="70"/>
+                                    <TableColumn fx:id="colOrderTotal" text="Total" prefWidth="110"/>
+                                    <TableColumn fx:id="colOrderState" text="État" prefWidth="120"/>
+                                </columns>
+                            </TableView>
+                        </center>
+
+                        <bottom>
+                            <VBox spacing="8" style="-fx-padding: 12 0 0 0;">
+                                <GridPane hgap="10" vgap="8">
+                                    <columnConstraints>
+                                        <ColumnConstraints minWidth="90"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                        <ColumnConstraints minWidth="90"/>
+                                        <ColumnConstraints hgrow="ALWAYS"/>
+                                    </columnConstraints>
+
+                                    <Label text="Acheteur" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="orderBuyerField" styleClass="dark-input" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                                    <Label text="Produit" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                                    <ComboBox fx:id="orderProductCombo" styleClass="dark-input" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                                    <Label text="Quantité" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="orderQtyField" styleClass="dark-input" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                                    <Label text="État" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                                    <ComboBox fx:id="orderStateCombo" styleClass="dark-input" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                                    <Label text="Prix total" style="-fx-text-fill: #b0b9b6;" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                    <TextField fx:id="orderTotalField" styleClass="dark-input" promptText="Auto si vide" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                                </GridPane>
+
+                                <HBox spacing="10" alignment="CENTER_RIGHT">
+                                    <Button text="Nouveau" onAction="#clearOrderForm"/>
+                                    <Button text="Ajouter" onAction="#createOrder" style="-fx-background-color: #18E3A4; -fx-text-fill: #000;"/>
+                                    <Button text="Modifier" onAction="#updateOrder"/>
+                                    <Button text="Supprimer" onAction="#deleteOrder" style="-fx-background-color: #7f1d1d; -fx-text-fill: #fff;"/>
+                                </HBox>
+                            </VBox>
+                        </bottom>
+                    </BorderPane>
+                </Tab>
+            </tabs>
+        </TabPane>
+    </center>
+</BorderPane>

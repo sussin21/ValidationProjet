@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+
+<AnchorPane fx:id="shopRoot" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.app.controllers.ShopController" style="-fx-background-color: #0d1117;" stylesheets="@shop-theme.css">
+
+    <VBox fx:id="siteContent" spacing="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+
+        <fx:include source="../partials/header.fxml" />
+
+        <!-- MAIN CONTENT -->
+        <VBox fx:id="main" style="-fx-padding: 0; -fx-background-color: linear-gradient(from 0% 0% to 100% 100%, #0d1117 0%, #1a1f1e 100%);">
+            <VBox fx:id="shopSection" style="-fx-min-height: 700; -fx-padding: 48 0 48 0; -fx-border-radius: 16; -fx-border-color: rgba(24, 227, 164, 0.1); -fx-border-width: 1;">
+                <VBox fx:id="container" style="-fx-padding: 0 32 0 32;">
+                    <!-- HEADER SECTION -->
+                    <HBox alignment="CENTER_LEFT" spacing="32">
+                        <VBox spacing="8">
+                            <Label text="BOUTIQUE" style="-fx-text-fill: white; -fx-font-size: 48; -fx-font-weight: bold;"/>
+                            <Label text="Découvrez nos produits fantastiques" style="-fx-text-fill: #999; -fx-font-size: 18;"/>
+                        </VBox>
+                        <HBox spacing="16" alignment="CENTER">
+                            <Button fx:id="quickBackendButton" text="⚙ Backend" style="-fx-background-color: #374151; -fx-text-fill: #fff; -fx-padding: 10 18 10 18; -fx-background-radius: 8;" onAction="#accessBackendQuick"/>
+                            <Button fx:id="addProductButton" text="+ Ajouter un produit" style="-fx-background-color: #18E3A4; -fx-text-fill: #000; -fx-padding: 10 18 10 18; -fx-background-radius: 8;" onAction="#addProduct"/>
+                            <Button text="🛒 Panier" style="-fx-background-color: #18E3A4; -fx-text-fill: #000; -fx-padding: 10 18 10 18; -fx-background-radius: 8;" onAction="#goCart"/>
+                            <Button text="📋 Mes commandes" style="-fx-background-color: transparent; -fx-text-fill: #18E3A4; -fx-border-color: #18E3A4; -fx-border-width: 2; -fx-padding: 10 18 10 18; -fx-background-radius: 8;" onAction="#goOrders"/>
+                        </HBox>
+                    </HBox>
+
+                    <!-- SEARCH & FILTERS ROW -->
+                    <HBox spacing="32" alignment="TOP_LEFT">
+                        <!-- SIDEBAR -->
+                        <VBox fx:id="sidebar" prefWidth="300" minWidth="300" maxWidth="300" style="-fx-background-color: #1a1f1e; -fx-padding: 24; -fx-border-radius: 8; -fx-border-color: #333; -fx-border-width: 1;">
+                            <VBox spacing="16">
+                                <!-- Search Input -->
+                                <TextField fx:id="searchField" promptText="Chercher..." style="-fx-background-color: #2a2f2e; -fx-text-fill: white; -fx-border-color: #333; -fx-border-radius: 4; -fx-padding: 12;"/>
+
+                                <!-- Type Filter -->
+                                <VBox spacing="12">
+                                    <Label text="TYPE DE PRODUIT" style="-fx-text-fill: #18E3A4; -fx-font-weight: bold;"/>
+                                    <ComboBox fx:id="typeFilter" style="-fx-background-color: #2a2f2e; -fx-text-fill: white; -fx-border-color: #333; -fx-border-radius: 4; -fx-padding: 12;"/>
+                                </VBox>
+
+                                <!-- Sort -->
+                                <VBox spacing="12">
+                                    <Label text="TRI" style="-fx-text-fill: #18E3A4; -fx-font-weight: bold;"/>
+                                    <ComboBox fx:id="sortFilter" style="-fx-background-color: #2a2f2e; -fx-text-fill: white; -fx-border-color: #333; -fx-border-radius: 4; -fx-padding: 12;"/>
+                                </VBox>
+
+                                <!-- Buttons -->
+                                <VBox spacing="8">
+                                    <Button text="🔍 Rechercher" style="-fx-background-color: #18E3A4; -fx-text-fill: #000; -fx-padding: 12; -fx-border-radius: 4;" onAction="#handleSearch"/>
+                                    <Button text="✕ Réinitialiser" style="-fx-background-color: transparent; -fx-text-fill: #18E3A4; -fx-border-color: #18E3A4; -fx-border-width: 2; -fx-padding: 12; -fx-border-radius: 4;" onAction="#resetFilters"/>
+                                </VBox>
+                            </VBox>
+                        </VBox>
+
+                        <!-- PRODUCTS GRID -->
+                        <VBox fx:id="productsArea" spacing="32" HBox.hgrow="ALWAYS">
+                            <Label text="PRODUITS" style="-fx-text-fill: white; -fx-font-size: 24; -fx-font-weight: bold;"/>
+
+                            <ScrollPane fx:id="productsScroll" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" fitToWidth="true">
+                                <FlowPane fx:id="productsGrid" hgap="32" vgap="32" style="-fx-padding: 16; -fx-background-color: transparent;"/>
+                            </ScrollPane>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </VBox>
+
+        <!-- FOOTER -->
+        <VBox fx:id="footer" style="-fx-background-color: rgba(13, 15, 15, 0.5); -fx-padding: 48 0 48 0; -fx-border-radius: 16; -fx-border-color: rgba(24, 227, 164, 0.1); -fx-border-width: 1 0 0 0;">
+            <VBox style="-fx-alignment: center; -fx-padding: 0 32 0 32;">
+                <Label text="© 2026 Midgar Fantasy Platform. Créez, partagez, vivez la magie." style="-fx-text-fill: #B0B9B6; -fx-text-alignment: center;"/>
+            </VBox>
+        </VBox>
+
+    </VBox>
+
+</AnchorPane>
