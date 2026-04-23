@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+
+<AnchorPane fx:id="shopRoot" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.app.controllers.ShopController" styleClass="shop-shell" stylesheets="@shop-theme.css">
+
+    <VBox fx:id="siteContent" spacing="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+
+        <fx:include source="../partials/header.fxml" />
+
+        <!-- MAIN CONTENT -->
+        <VBox fx:id="main" style="-fx-padding: 0; -fx-background-color: transparent;">
+            <VBox fx:id="shopSection" styleClass="shop-hero" style="-fx-min-height: 700; -fx-padding: 48 0 48 0;">
+                <VBox fx:id="container" style="-fx-padding: 0 32 0 32;">
+                    <!-- HEADER SECTION -->
+                    <HBox alignment="CENTER_LEFT" spacing="32" styleClass="shop-card-soft" style="-fx-padding: 24;">
+                        <VBox spacing="8">
+                            <Label text="BOUTIQUE" styleClass="shop-card-title" style="-fx-font-size: 48;"/>
+                            <Label text="Découvrez nos produits fantastiques" styleClass="shop-muted" style="-fx-font-size: 18;"/>
+                        </VBox>
+                        <HBox spacing="16" alignment="CENTER">
+                            <Button fx:id="quickBackendButton" text="⚙ Backend" styleClass="shop-ghost-button" onAction="#accessBackendQuick"/>
+                            <Button fx:id="supportButton" text="💬 Support" styleClass="shop-outline-button" onAction="#openSupportChat"/>
+                            <Button fx:id="addProductButton" text="+ Ajouter un produit" styleClass="shop-accent-button" onAction="#addProduct"/>
+                            <Button text="🛒 Panier" styleClass="shop-accent-button" onAction="#goCart"/>
+                            <Button text="📋 Mes commandes" styleClass="shop-outline-button" onAction="#goOrders"/>
+                        </HBox>
+                    </HBox>
+
+                    <!-- SEARCH & FILTERS ROW -->
+                    <HBox spacing="32" alignment="TOP_LEFT">
+                        <!-- SIDEBAR -->
+                        <VBox fx:id="sidebar" prefWidth="300" minWidth="300" maxWidth="300" styleClass="shop-card" style="-fx-padding: 24;">
+                            <VBox spacing="16">
+                                <!-- Search Input -->
+                                <TextField fx:id="searchField" promptText="Chercher..." styleClass="dark-input"/>
+
+                                <!-- Type Filter -->
+                                <VBox spacing="12">
+                                    <Label text="TYPE DE PRODUIT" styleClass="shop-section-title" style="-fx-font-size: 14;"/>
+                                    <ComboBox fx:id="typeFilter" styleClass="dark-input"/>
+                                </VBox>
+
+                                <!-- Sort -->
+                                <VBox spacing="12">
+                                    <Label text="TRI" styleClass="shop-section-title" style="-fx-font-size: 14;"/>
+                                    <ComboBox fx:id="sortFilter" styleClass="dark-input"/>
+                                </VBox>
+
+                                <!-- Buttons -->
+                                <VBox spacing="8">
+                                    <Button text="🔍 Rechercher" styleClass="shop-accent-button" onAction="#handleSearch"/>
+                                    <Button text="✕ Réinitialiser" styleClass="shop-outline-button" onAction="#resetFilters"/>
+                                </VBox>
+                            </VBox>
+                        </VBox>
+
+                        <!-- PRODUCTS GRID -->
+                        <VBox fx:id="productsArea" spacing="32" HBox.hgrow="ALWAYS">
+                            <Label text="PRODUITS" styleClass="shop-section-title" style="-fx-font-size: 24;"/>
+
+                            <ScrollPane fx:id="productsScroll" style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;" fitToWidth="true">
+                                <FlowPane fx:id="productsGrid" hgap="32" vgap="32" style="-fx-padding: 16; -fx-background-color: transparent;"/>
+                            </ScrollPane>
+                        </VBox>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </VBox>
+
+        <!-- FOOTER -->
+        <VBox fx:id="footer" style="-fx-background-color: rgba(13, 15, 15, 0.5); -fx-padding: 48 0 48 0; -fx-border-radius: 16; -fx-border-color: rgba(24, 227, 164, 0.1); -fx-border-width: 1 0 0 0;">
+            <VBox style="-fx-alignment: center; -fx-padding: 0 32 0 32;">
+                <Label text="© 2026 Midgar Fantasy Platform. Créez, partagez, vivez la magie." style="-fx-text-fill: #B0B9B6; -fx-text-alignment: center;"/>
+            </VBox>
+        </VBox>
+
+    </VBox>
+
+</AnchorPane>

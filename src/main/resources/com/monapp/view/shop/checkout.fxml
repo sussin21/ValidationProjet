@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.shape.Line?>
+
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.app.controllers.ShopCheckoutController" styleClass="shop-shell" stylesheets="@shop-theme.css">
+
+    <VBox spacing="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0">
+
+        <StackPane styleClass="shop-hero" style="-fx-min-height: 150; -fx-padding: 24;">
+            <VBox alignment="CENTER">
+                <Label text="PAIEMENT" styleClass="shop-card-title" style="-fx-font-size: 36;"/>
+            </VBox>
+        </StackPane>
+
+        <HBox style="-fx-padding: 40 100;" spacing="40">
+            <!-- Checkout Form -->
+            <VBox spacing="25" HBox.hgrow="ALWAYS">
+                <Label text="Informations de livraison" styleClass="shop-section-title" style="-fx-font-size: 20;"/>
+                
+                <GridPane hgap="15" vgap="15">
+                    <columnConstraints>
+                        <ColumnConstraints minWidth="200"/>
+                        <ColumnConstraints minWidth="200"/>
+                    </columnConstraints>
+                    
+                    <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                        <Label text="Prénom" style="-fx-text-fill: #b0b9b6;"/>
+                        <TextField fx:id="firstNameField" styleClass="dark-input"/>
+                    </VBox>
+                    <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                        <Label text="Nom" style="-fx-text-fill: #b0b9b6;"/>
+                        <TextField fx:id="lastNameField" styleClass="dark-input"/>
+                    </VBox>
+                    <VBox spacing="5" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="1">
+                        <Label text="Adresse" style="-fx-text-fill: #b0b9b6;"/>
+                        <TextField fx:id="addressField" styleClass="dark-input"/>
+                    </VBox>
+                    <VBox spacing="5" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                        <Label text="Ville" style="-fx-text-fill: #b0b9b6;"/>
+                        <TextField fx:id="cityField" styleClass="dark-input"/>
+                    </VBox>
+                    <VBox spacing="5" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <Label text="Code postal" style="-fx-text-fill: #b0b9b6;"/>
+                        <TextField fx:id="zipCodeField" styleClass="dark-input"/>
+                    </VBox>
+                </GridPane>
+
+                <Label text="Informations de paiement" styleClass="shop-section-title" style="-fx-font-size: 20;"/>
+                
+                <VBox spacing="15">
+                    <VBox spacing="5">
+                        <Label text="Numéro de carte" style="-fx-text-fill: #b0b9b6;"/>
+                        <TextField fx:id="cardNumberField" promptText="0000 0000 0000 0000" styleClass="dark-input"/>
+                    </VBox>
+                    <HBox spacing="15">
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="Date d'expiration" style="-fx-text-fill: #b0b9b6;"/>
+                            <TextField fx:id="expiryDateField" promptText="MM/AA" styleClass="dark-input"/>
+                        </VBox>
+                        <VBox spacing="5" HBox.hgrow="ALWAYS">
+                            <Label text="CVV" style="-fx-text-fill: #b0b9b6;"/>
+                            <TextField fx:id="cvvField" promptText="123" styleClass="dark-input"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <Button fx:id="payButton" text="Payer 74.97€" onAction="#processPayment" styleClass="shop-accent-button"/>
+                <Button text="Retour au panier" onAction="#goBackToCart" styleClass="shop-outline-button"/>
+            </VBox>
+
+            <!-- Order Summary -->
+            <VBox fx:id="orderSummary" styleClass="shop-card" style="-fx-padding: 25; -fx-min-width: 300;" spacing="20">
+                <Label text="Récapitulatif" styleClass="shop-section-title" style="-fx-font-size: 18;"/>
+                
+                <VBox fx:id="orderItemsContainer" spacing="10"/>
+
+                <Line stroke="#2a3139"/>
+
+                <HBox>
+                    <Label text="Total" style="-fx-text-fill: #fff; -fx-font-weight: bold;"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="totalLabel" text="74.97€" style="-fx-text-fill: #18E3A4; -fx-font-size: 20; -fx-font-weight: bold;"/>
+                </HBox>
+            </VBox>
+        </HBox>
+
+    </VBox>
+
+</AnchorPane>

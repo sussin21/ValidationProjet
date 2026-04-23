@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.app.controllers.ShopOrdersController" styleClass="shop-shell" stylesheets="@../shop-theme.css">
+
+    <VBox spacing="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        
+        <StackPane styleClass="shop-hero" style="-fx-min-height: 150; -fx-padding: 24;">
+            <VBox alignment="CENTER">
+                <Label text="MES COMMANDES" styleClass="shop-card-title" style="-fx-font-size: 36;"/>
+            </VBox>
+        </StackPane>
+
+        <VBox fx:id="ordersContainer" style="-fx-padding: 30 100;" spacing="20"/>
+
+    </VBox>
+
+</AnchorPane>
