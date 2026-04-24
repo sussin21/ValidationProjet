@@ -17,6 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Service de prédiction de stock utilisant la régression linéaire.
+ * Analyse l'historique des ventes 30 jours pour prédire la demande future.
+ * Calcule un score de confiance basé sur la volatilité et la qualité des données.
+ */
 public class StockPredictionService {
 
     private final ProduitDAO produitDAO = new ProduitDAO();
