@@ -17,11 +17,9 @@
         </HBox>
     </top>
 
-    <center>
-        <TabPane fx:id="backendTabPane" tabClosingPolicy="UNAVAILABLE" style="-fx-padding: 14;">
-            <tabs>
-                <Tab text="Produits">
-                    <BorderPane styleClass="shop-card-soft" style="-fx-padding: 12;">
+    </center>
+</BorderPane>
+
                         <top>
                             <VBox spacing="10" style="-fx-padding: 0 0 10 0;">
                                 <Label text="Gestion Produits" styleClass="shop-section-title" style="-fx-font-size: 16;"/>
@@ -306,5 +304,6 @@
         </TabPane>
     </center>
 </BorderPane>
-< ! - -   A u t o   U I   T a b   f o r   R e p o r t s   - - >  
+< ! - -   A u t o   U I   T a b   f o r   R e p o r t s   - - > 
+ 
  
