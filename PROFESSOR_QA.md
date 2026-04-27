@@ -1,389 +1,274 @@
 # 📋 Questions & Réponses - Examen Oral
-
-## **PARTIE 1: AI CHATBOT**
-
-### Q1: Expliquez le fonctionnement du chatbot que vous avez implémenté ?
-**R:** Le chatbot est basé sur l'API Google Gemini 2.5 Flash. Voici le workflow:
-1. L'utilisateur pose une question dans l'interface boutique
-2. Le système collecte le contexte: nom client, numéro commande, type de problème
-3. ChatbotService construit un prompt enrichi avec le catalogue de produits depuis la DB
-4. Envoi HTTP vers l'API Gemini avec timeout 30 secondes
-5. Parsing JSON de la réponse via regex
-6. Affichage de la réponse en temps réel via Task JavaFX asynchrone
-
-### Q2: Quelle technologie d'IA avez-vous utilisée et pourquoi ?
-**R:** Google Gemini 2.5 Flash car:
-- **Rapide**: Réponses < 1 seconde pour support client
-- **Économique**: Model gratuit avec limite généreuse
-- **Fiable**: 99.9% uptime Google infrastructure
-- **Context-aware**: Peut utiliser le catalogue produits pour réponses précises
-- **Alternative locale**: Fallback rule-based si API indisponible
-
-### Q3: Comment gérez-vous les erreurs et timeouts du chatbot ?
-**R:** 
-- Try-catch sur HttpClient avec timeout 30s
-- Si API échoue → fallback rule-based (regex patterns pour FAQ)
-- Si timeout → message "Service indisponible, essayez plus tard"
-- Logging complet dans console pour debug
-- Queue asynchrone pour ne pas bloquer l'UI
-
-### Q4: Avez-vous implémenté l'historique de conversation ?
-**R:** Non, pour cette itération. C'est une limitation connue. Améliorations futures:
-- Stocker messages dans DB avec userId + timestamp
-- Implémenter context sliding window (derniers 5 messages)
-- Ajouter sentiment analysis pour détection problèmes critiques
-
-### Q5: Comment le chatbot accède aux données produits ?
-**R:** Via ProduitService qui requête la DB MySQL. Le prompt inclut:
-```
-Catalogue disponible:
-- [Nom]: Prix €X, Stock: Y
-- ...
-```
-Cela permet au chatbot de faire des recommandations précises.
+**Examen pratique des 3 features: Chatbot IA, Prédiction Stock, Automatisation**
 
 ---
 
-## **PARTIE 2: PRÉDICTION DE STOCK (RISK PREDICTION)**
+## 🤖 **AI CHATBOT - Questions Techniques**
 
-### Q6: Expliquez l'algorithme de prédiction de stock que vous utilisez ?
-**R:** **Régression Linéaire** sur données historiques 30 jours:
-- Collecte: Derniers 30 jours de ventes par produit
-- Formule: `y = mx + b` (slope + intercept)
-- Calcul m: $m = \frac{n\sum xy - \sum x \sum y}{n\sum x^2 - (\sum x)^2}$
-- Calcul b: $b = \frac{\sum y - m\sum x}{n}$
-- **Prédiction**: `Demande_demain = m(jour_31) + b`
-- **Stock recommandé**: Prédiction × 14 jours (buffer)
-
-### Q7: Comment calculez-vous le score de confiance ?
-**R:** Score basé sur 3 pénalités:
-
-1. **Volatilité** (variance des données):
-   - Formule: `√variance × 5` (max 40%)
-   - Ventes très variables = moins fiable
-
-2. **Données insuffisantes**:
-   - Si < 5 jours ventes: -25%
-   - Pas assez d'historique pour bon fitting
-
-3. **Demande nulle/négative**:
-   - Si prédiction ≤ 0: -20%
-   - Produit probablement discontinué
-
-**Score final**: `100 - Pénalités` (min 5%, max 100%)
-
-Exemple:
-- Volatilité: 30%, Données: 10%, Demande: 0% → Score = **60%**
-
-### Q8: Comment classifiez-vous le risque de stock ?
-**R:** 3 niveaux basés sur stock actuel vs recommandé:
-
-| Niveau | Condition | Action |
-|--------|-----------|--------|
-| **CRITIQUE** 🔴 | Stock ≤ 3 | Alerte immédiate |
-| **FAIBLE** 🟡 | 3 < Stock ≤ 10 | Surveillance |
-| **SAIN** 🟢 | Stock > 10 | Normal |
-
-Exemple: Produit XYZ
-- Stock actuel: 5
-- Prédiction jour 31: 8
-- Recommandé: 8 × 14 = 112
-- **Risque**: FAIBLE (mais acheter 100+ unités)
-
-### Q9: Comment les prédictions sont-elles stockées et mises à jour ?
-**R:** Table `stock_prediction` MySQL:
-```sql
-CREATE TABLE stock_prediction (
-    id INT PRIMARY KEY,
-    product_id INT,
-    predicted_demand FLOAT,
-    recommended_stock INT,
-    confidence_score INT,
-    risk_level VARCHAR(50),
-    created_at TIMESTAMP
-);
-```
-- Mises à jour: Quotidiennes (via bouton "Calculer prédictions")
-- Historique: Conservé pour trend analysis
-- Retention: 90 jours glissants
-
-### Q10: Que se passe-t-il si les données historiques sont insuffisantes ?
+### Q1: Où et comment est stockée la clé API Gemini ?
 **R:** 
-- Si < 5 jours: Pénalité -25% sur confiance
-- Si 0 ventes: Prédiction = 0, risque CRITIQUE
-- Recommandation: Commencer avec stock minimal (10 unités)
-- Attendre 30 jours avant bonnes prédictions
-
-### Q11: Pourquoi Régression Linéaire et pas Machine Learning avancé ?
-**R:** 
-**Avantages RL:**
-- Simple à implémenter et comprendre
-- Pas dépendance librairie ML externe
-- Rapide calcul (O(n) complexity)
-- Interprétabilité: On voit m et b
-
-**Limitations:**
-- Suppose tendance linéaire (peut être exponentielle/cyclique)
-- Sensible aux outliers
-- Pas capture saisonnalité
-
-**Améliorations futures:**
-- Polynomial Regression
-- Prophet (Facebook) pour saisonnalité
-- LSTM Neural Networks
-
----
-
-## **PARTIE 3: AUTOMATISATION**
-
-### Q12: Décrivez le système d'automatisation que vous avez implémenté ?
-**R:** Deux types d'événements automatisés:
-
-**Type 1: STOCK_ALERT**
-- Déclenche quand stock < 10
-- Description: "Stock faible pour [Produit]"
-- Génère notification automatique
-
-**Type 2: RESTOCK**
-- Déclenche si recommandé_stock > stock_actuel
-- Génère commande d'achat suggestion
-- Priorité basée sur urgence
-
-### Q13: Comment gérez-vous la génération des alertes ?
-**R:** Via `ShopAutomationEventService.generateAlerts()`:
-1. Requête DB: `SELECT * FROM produits WHERE stock < 10`
-2. Pour chaque produit:
-   - Créer ShopAutomationEvent (type STOCK_ALERT)
-   - Déterminer sévérité (CRITIQUE si ≤3)
-   - Insérer en DB
-3. Afficher dans ListView (max 20 derniers)
-4. Horodatage: Timestamp auto MySQL
-
-### Q14: Les alertes sont-elles envoyées par mail automatiquement ?
-**R:** Pas vraiment "automatique" encore. Workflow actuel:
-1. Générer alertes (UI button)
-2. Admin révise dans ListView
-3. Admin clique "Préparer mail alerte"
-4. Pré-remplissage template mail
-5. Admin clique "Envoyer" (MailService)
-
-**Improvement**: Cron job MySQL pour auto-trigger nuit
-
-### Q15: Comment intégrez-vous les prédictions dans l'automatisation ?
-**R:** 
+```java
+// ChatbotService.java ligne 157
+private String getApiKey() {
+    return System.getenv("GEMINI_API_KEY");
+}
 ```
-Pour chaque produit:
-IF prédiction.stock_recommandé > produit.stock_actuel THEN
-    CREATE ShopAutomationEvent (type=RESTOCK)
-    SET quantité_suggérée = recommandé - actuel
-    SET priorité = HIGH si risque==CRITIQUE
-    INSERT notification
-END IF
-```
+- Stockée en **variable d'environnement** `GEMINI_API_KEY`
+- Jamais hardcodée dans le code (sécurité)
+- Configuration sur machine locale: `set GEMINI_API_KEY=sk_live_xxx`
 
-Cela crée automatiquement suggestions de réapprovisionnement intelligentes.
-
-### Q16: Avez-vous implémenté des règles métier complexes ?
-**R:** Oui, les alertes considèrent:
-- **Stock critique**: Alerte rouge
-- **Trend négatif**: Si pente < 0 (régression)
-- **Delai livraison**: Optionnel (not yet)
-- **Saisonnalité**: Basique (28 jours de buffer)
-
-Exemple règle:
-```
-IF stock < 5 AND trend_slope < -1 THEN
-    priority = "URGENT"
-    email_to = ["manager@shop.com", "warehouse@shop.com"]
-END IF
-```
-
----
-
-## **PARTIE 4: INTÉGRATION GLOBALE**
-
-### Q17: Comment les 3 features (Chat, Prédiction, Automation) travaillent ensemble ?
-**R:** Architecture en couches:
-
-```
-┌─────────────────────────────────────┐
-│      JavaFX UI (TabPane)            │
-├─────────────────────────────────────┤
-│    ShopBackendController            │
-│  - Handles UI events                │
-│  - Orchestrates services            │
-├─────────────────────────────────────┤
-│    Service Layer                    │
-│  - ChatbotService                   │
-│  - StockPredictionService           │
-│  - ShopAutomationEventService       │
-│  - ShopAnalyticsService             │
-├─────────────────────────────────────┤
-│    DAO Layer (Data Access)          │
-│  - ProduitDAO                       │
-│  - StockPredictionDAO               │
-│  - ShopAutomationEventDAO           │
-├─────────────────────────────────────┤
-│    MySQL Database                   │
-│  - produits                         │
-│  - stock_prediction                 │
-│  - shop_automation_event            │
-│  - commandes                        │
-└─────────────────────────────────────┘
-```
-
-**Flux workflow:**
-1. Admin click "Calculer prédictions"
-2. StockPredictionService → linear regression sur sales history
-3. Résultats → stock_prediction table
-4. ShopAutomationEventService lit les prédictions
-5. Génère alertes/restock events
-6. UI affiche dans ListView
-7. Si client click chatbot → ChatbotService contextualise avec ces données
-
-### Q18: Comment assurez-vous la performance avec ces features?
-**R:** 
-- **Async/Threading**: Toutes opérations longues en JavaFX Task
-- **Caching**: Produits loadés en mémoire au startup
-- **Indexing DB**: stock_prediction indexed sur product_id
-- **Pagination**: ListView 20 derniers events (pas tous)
-- **API Timeout**: 30 secondes max pour Gemini
-
-### Q19: Quels tests avez-vous effectués ?
+### Q2: Décrivez l'architecture du chat avec Gemini ?
 **R:**
-- Prédictions: Comparé réel vs prédit sur produits connus
-- Chatbot: Requêtes multiples simultanées → vérifier async
-- Alertes: Baissé stock produits → vérifier trigger
-- Edge cases: 0 ventes, 1 vente, 100+ ventes
-- Performance: 1000 prédictions en < 5 sec
+```
+Client Query (String)
+        ↓
+ChatbotService.chat(message, customerInfo)
+        ↓
+buildPrompt() → Contexte client + 5 produits top
+        ↓
+HttpRequest POST → https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash
+        ↓
+Response JSON → extractText() via Regex
+        ↓
+Result affichée en AsyncTask JavaFX
+```
 
-### Q20: Quels sont les limitations et améliorations futures ?
+**Timeout**: 30 secondes
+**Model**: `gemini-2.5-flash`
+**Format requête**: JSON avec temperature=0.7, maxTokens=512
+
+### Q3: Comment fonctionne le fallback si l'API échoue ?
 **R:**
+```java
+// ChatbotService.java ligne 39-41
+if (apiKey == null || apiKey.isBlank()) {
+    return buildLocalSupportReply(message, customerInfo);
+}
+```
+**Fallback rule-based** avec regex patterns:
+- `"commande"` → Vérifiez suivi ou donnez numéro
+- `"livraison"` → Indiquez numéro commande
+- `"retour"` → Gardez preuve d'achat + contact support
+- `"stock"` → Dites nom du produit
+- Sinon → Réponse générique
 
-**Limitations actuelles:**
-- Pas historique chatbot (pas IA "stateful")
-- Prédictions linéaires (ignorent saisonnalité)
-- Alertes manuelles (pas cron job)
-- Pas ML models (simple regression)
-- API Gemini dépendance externe
+### Q4: Montrez un exemple de prompt envoyé à Gemini ?
+**R:**
+```
+Tu es l'assistant boutique Midgar. Réponds en français, courte, utile et poliment.
 
-**Améliorations futures:**
-1. **Chatbot V2**: Historique + memory + sentiment analysis
-2. **Prédictions V2**: Prophet, LSTM, seasonal decomposition
-3. **Automation V2**: Scheduled jobs, webhook integrations
-4. **Analytics V2**: Real-time dashboard, WebSocket updates
-5. **Multi-language**: i18n support pour support international
-6. **Offline mode**: SQLite fallback si API down
+Contexte client:
+- name: Ahmed
+- order_id: 12345
+
+Contexte produits:
+- Excalibur | type: épée | prix: 500 | stock: 3
+- Shield Dragon | type: bouclier | prix: 200 | stock: 15
+- Spell Book | type: livre | prix: 50 | stock: 0
+
+Message utilisateur: Est-ce que l'Excalibur est disponible ?
+```---
+
+## 📊 **STOCK PREDICTION - Algos & Formules**
+
+### Q5: Écrivez la formule exacte de la régression linéaire ?
+**R:** Pour les points (x₁,y₁) ... (xₙ,yₙ):
+
+$$m = \frac{n\sum xy - \sum x \sum y}{n\sum x^2 - (\sum x)^2}$$
+
+$$b = \frac{\sum y - m\sum x}{n}$$
+
+$$\text{Prédiction}_{j+1} = m \times (n+1) + b$$
+
+Exemple: 5 jours de ventes [10, 12, 15, 14, 18] → pente ≈ 2 → jour 6 prédiction ≈ 20
+
+### Q6: Comment calculez-vous le score de confiance à 5 points ?
+**R:** 3 pénalités appliquées (max 100%):
+
+1. **Volatilité**: `variance = Σ(y - moyenne)² / n` → pénalité `√variance × 5` (max 40%)
+2. **Données insuffisantes**: Si < 5 jours → pénalité 25%
+3. **Demande nulle**: Si prédiction ≤ 0 → pénalité 20%
+
+**Formule finale**: `confiance = clamp(100 - pénalités, 5, 100)`
+
+Exemple: variance=50, données OK, demande positive → pénalité ≈ 35% → confiance = **65%**
+
+### Q7: Comment classifiez-vous les risques ?
+**R:** Basé sur `stock_actuel`:
+```
+SI stock ≤ 3  → CRITIQUE 🔴 (action immédiate)
+SI stock ≤ 10 → FAIBLE 🟡 (monitoring)
+SINON         → SAIN 🟢 (normal)
+```
+
+Exemple: Produit stock=2, recommandé=50 → **CRITIQUE + achat urgent 48 unités**
+
+### Q8: Qu'est-ce qui a été modifié dans le service ?
+**R:** Dans `StockPredictionService.java`:
+- Ajout JavaDoc complet
+- Documentation de l'algorithme de régression
+- Classe commentée pour clarté du calcul de confiance
+- Clarification des limites du modèle linéaire
 
 ---
 
-## **PARTIE 5: ARCHITECTURE & DESIGN PATTERNS**
+## 🔄 **AUTOMATISATION - Implémentation Réelle**
 
-### Q21: Quels design patterns avez-vous utilisés ?
+### Q9: Avec quoi est construite l'automatisation ?
+**R:** 3 composants:
+
+1. **ShopAutomationEventService**
+   - Crée événements `ShopAutomationEvent`
+   - Deux types: `STOCK_ALERT` et `AUTO_RESTOCK`
+
+2. **ShopAnalyticsService** 
+   - `getLowStockProducts(threshold)` → filtre stock ≤ seuil
+   - Requête SQL: `SELECT * FROM produit WHERE quantite ≤ threshold`
+
+3. **ProduitService + MySQL**
+   - Update stock: `produit.setQuantiteDisponible(5)`
+   - `produitService.update(product)`
+
+### Q10: Comment fonctionnel le système d'alertes ?
 **R:**
-
-1. **Service Pattern**: ChatbotService, StockPredictionService (business logic isolation)
-2. **DAO Pattern**: Accès DB abstrait
-3. **Singleton**: MyDatabase (une seule connexion)
-4. **Strategy**: Différentes stratégies d'alertes (STOCK_ALERT vs RESTOCK)
-5. **Observer/MVC**: JavaFX bindings automatiques
-6. **Factory**: Services créés en contrôleur
-
-### Q22: Comment gérez-vous les exceptions ?
-**R:** Hiérarchie:
+```java
+// ShopAutomationEventService.java
+public List<ShopAutomationEvent> generateStockAlerts(int threshold) {
+    List<Produit> lowStock = analyticsService.getLowStockProducts(threshold);
+    for (Produit p : lowStock) {
+        createEvent("STOCK_ALERT", 
+                    "Stock critique: " + p.getNom() + " (" + p.getQuantite() + ")",
+                    "ACTIVE");
+    }
+}
 ```
-SQLException → try-catch → showError dialog
-HttpClient exception → fallback + logging
-JSON parsing error → default response
-Timeout → retry logic ou fallback
-```
+**Seuil défaut**: 10 unités
+**Trigger**: Manual (button "Générer alertes")
+**Statut**: ACTIVE ou COMPLETED
 
-Principe: Ne jamais crash l'app, toujours fallback gracieux.
-
-### Q23: Comment avez-vous documenté votre code ?
+### Q11: Décrivez le auto-restock à 5 unités ?
 **R:**
-- Javadoc comments sur méthodes publiques
-- Inline comments sur logique complexe (régression)
-- README avec architecture diagram
-- TECHNICAL_FEATURES_SUMMARY.md détaillé
+```java
+// Nouvelle méthode implémentée
+public List<ShopAutomationEvent> autoRestockZeroStockProducts() {
+    List<Produit> all = produitService.select();
+    for (Produit p : all) {
+        if (p.getQuantiteDisponible() == 0) {
+            p.setQuantiteDisponible(5);
+            produitService.update(p);  // UPDATE produits SET quantite=5 WHERE id=X
+            createEvent("AUTO_RESTOCK", 
+                        "AUTO-RESTOCK: " + p.getNom() + " (0→5)",
+                        "COMPLETED");
+        }
+    }
+}
+```
+**Logique**: Stock = 0 → Restock à 5 automatiquement
+**Événement**: Tracé dans la table `shop_automation_event`
 
----
-
-## **PARTIE 6: REQUÊTE DB & PERFORMANCE**
-
-### Q24: Écrivez la requête pour les alertes de stock ?
+### Q12: Quelles requêtes SQL sont utilisées ?
 **R:**
 ```sql
-SELECT p.id, p.name, p.stock, sp.recommended_stock, sp.confidence_score
-FROM produits p
-LEFT JOIN stock_prediction sp ON p.id = sp.product_id
-WHERE p.stock < 10
-ORDER BY p.stock ASC, sp.confidence_score DESC
+-- Alertes stock
+SELECT id, nom_produit, quantite_disponible 
+FROM produit 
+WHERE quantite_disponible <= 10
+ORDER BY quantite_disponible ASC;
+
+-- Restock automatique
+UPDATE produit 
+SET quantite_disponible = 5 
+WHERE quantite_disponible = 0;
+
+-- Suivi des événements
+SELECT * FROM shop_automation_event 
+ORDER BY created_at DESC 
 LIMIT 20;
 ```
 
-### Q25: Comment optimiseriez-vous les prédictions pour 10000 produits ?
-**R:**
-- Index sur product_id + created_at
-- Batch processing (500 produits par lot)
-- ExecutorService thread pool (4 threads)
-- Cache à 1 heure
-- Requête historical data en async
-- Prédictions en background thread nuit
+### Q13: Quel fichier UI affiche l'automatisation ?
+**R:** 
+```xml
+<!-- backend.fxml - Tab "Rapports & Automatisation" -->
+<Tab text="Rapports &amp; Automatisation">
+    <ListView fx:id="automationListView" prefHeight="300"/>
+    <!-- Affiche derniers 20 événements -->
+</Tab>
+```
+**Contrôleur**: `ShopBackendController.java`
+**Méthodes**: 
+- `generateAutomationAlerts()` → trigger alerts
+- `reloadAutomationEvents()` → ListView update
 
-```java
-// Pseudo-code
-ExecutorService pool = Executors.newFixedThreadPool(4);
-List<Future<StockPrediction>> futures = new ArrayList<>();
-for (Produit p : produits) {
-    futures.add(pool.submit(() -> predictStock(p)));
-}
+---
+
+## 📈 **ANALYTICS - Formules & Calculs**
+
+### Q14: Montrez comment les analytics sont calculées ?
+**R:** Via `ShopAnalyticsService`:
+
+**1. Ventes 30 jours:**
+```sql
+SELECT SUM(prix_total) FROM commande 
+WHERE DATE(created_at) >= DATE_SUB(NOW(), INTERVAL 30 DAY)
 ```
 
----
+**2. Nombre de commandes:**
+```sql
+SELECT COUNT(*) FROM commande 
+WHERE DATE(created_at) >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+```
 
-## **PARTIE 7: SÉCURITÉ**
+**3. Croissance %:**
+$$\text{Croissance} = \frac{\text{Ventes30j} - \text{Ventes30jPrecedents}}{\text{Ventes30jPrecedents}} \times 100$$
 
-### Q26: Comment sécurisez-vous l'API Gemini ?
+**4. Panier moyen:**
+$$\text{PanierMoyen} = \frac{\text{VentesTotales30j}}{\text{NbCommandes30j}}$$
+
+### Q15: Comment segmentez-vous les clients ?
 **R:**
-- API key en variable d'environnement (jamais hardcoded)
-- Token refresh automatique
-- Rate limiting (max 10 req/min)
-- HTTPS only pour API calls
+```java
+// ShopAnalyticsService.java ligne 140
+Map<String, Integer> segments = countCustomerSegments();
+```
 
-### Q27: Avez-vous validé les inputs utilisateur ?
+**Logique:**
+```sql
+SELECT acheteur, COUNT(*) as order_count FROM commande GROUP BY acheteur
+```
+
+**Segmentation:**
+```
+VIP:        >= 5 commandes
+REGULAR:    >= 2 et < 5 commandes  
+OCCASIONAL: 1 commande
+```
+
+**Exemple**: Ahmed (7 commandes) → VIP, Jean (2 commandes) → REGULAR
+
+### Q16: Qu'est-ce que le score de risque de stock ?
+**R:** Calculé dans `ProductPerformanceRow`:
+```
+SI quantite <= 3  → "Critique"  🔴
+SI quantite <= 10 → "Faible"    🟡
+SINON             → "Sain"      🟢
+```
+
+**Tableau performance**: Affiche pour chaque produit:
+- Demande (ventes derniers 30j)
+- Marge estimée (prix × 0.25)
+- Risque stock (basé sur quantité)
+- Stock actuel
+
+### Q17: Montrez la requête complète pour la performance des produits ?
 **R:**
-- Chatbot query: Trim + max 500 chars
-- Produit création: Regex validation nom/type
-- Stock: Integer only, > 0
-- Prix: Double, 2 decimals
-- Pas injection SQL (PreparedStatement partout)
-
----
-
-## **TIPS POUR L'EXAMEN**
-
-### À mémoriser:
-✅ **Linear Regression formula**: m = Σ(xy) / Σ(x²)
-✅ **3 confidence penalties**: Volatility, Data, Demand
-✅ **3 risk levels**: Critique (≤3), Faible (3-10), Sain (>10)
-✅ **Gemini API**: Google model utilisé, 30s timeout
-✅ **Database tables**: stock_prediction, shop_automation_event
-✅ **Design patterns**: Singleton, Service, DAO, Observer
-
-### À préparer:
-🎯 Diagrammes: Architecture, DB schema, class diagram
-🎯 Exemples: Avec nombres réels (ex: produit avec 100€ ventes, prédiction 120€)
-🎯 Code: Pouvoir montrer StockPredictionService.java
-🎯 Logs: Avoir des captures d'alertes générées
-🎯 Demo: Pouvoir générer une prédiction en live
-
-### Questions piège possibles:
-❓ "Pourquoi pas TensorFlow pour ML?" → Trop lourd, régression suffisante
-❓ "Comment gérer données manquantes?" → Pénalité confiance, 5 jours minimum
-❓ "Scalabilité 1M produits?" → Thread pool, batch processing, caching
-❓ "Que se passe si API échoue?" → Fallback rule-based, logging
-
----
-
-**Bonne chance! 🚀**
+```sql
+SELECT p.id, p.nom_produit, p.prix, p.quantite_disponible,
+       COALESCE(SUM(c.quantite), 0) as sold_quantity,
+       COALESCE(SUM(c.prix_total), 0) as revenue
+FROM produit p 
+LEFT JOIN commande c ON c.produit_id = p.id
+GROUP BY p.id, p.nom_produit, p.prix, p.quantite_disponible
+ORDER BY sold_quantity DESC
+LIMIT 10;
+```
