@@ -901,3 +901,5 @@ public class ShopBackendController extends BaseController {
         return String.format(Locale.FRANCE, "%+.1f%%", value);
     }
 }
+/ /   O p t i m i z a t i o n  
+ 
